@@ -32,8 +32,12 @@ class ddeVar:
         """ Add one new (ti,yi) to the interpolator """
 
         self.itpr.x = np.hstack([self.itpr.x, [t]])
-        Y2 = Y if (Y.size==1) else np.array([Y]).T
-        self.itpr.y = np.hstack([self.itpr.y, Y2])
+        if Y.size == 1:
+            self.itpr.y = np.hstack([self.itpr.y, Y])
+        else:
+            Y2 = np.array([Y], ndmin=2)
+            self.itpr._y = np.vstack([self.itpr._y, Y2])
+
         self.itpr.fill_value = Y
 
     def __call__(self,t=0):
@@ -102,36 +106,6 @@ def ddeint(func,g,tt,fargs=None):
 
     fargs
       Additional arguments to be passed to parameter ``func``, if any.
-
-
-    Examples
-    ---------
-    
-    We will solve the delayed Lotka-Volterra system defined as
-    
-        For t < 0:
-        x(t) = 1+t
-        y(t) = 2-t
-    
-        For t >= 0:
-        dx/dt =  0.5* ( 1- y(t-d) )
-        dy/dt = -0.5* ( 1- x(t-d) )
-    
-    The delay ``d`` is a tunable parameter of the model.
-
-    >>> import numpy as np
-    >>> from ddeint import ddeint
-    >>> 
-    >>> def model(XY,t,d):
-    >>>     x, y = XY(t)
-    >>>     xd, yd = XY(t-d)
-    >>>     return np.array([0.5*x*(1-yd), -0.5*y*(1-xd)])
-    >>> 
-    >>> g = lambda t : np.array([1+t,2-t]) # 'history' at t<0
-    >>> tt = np.linspace(0,30,20000) # times for integration
-    >>> d = 0.5 # set parameter d 
-    >>> yy = ddeint(model,g,tt,fargs=(d,)) # solve the DDE !
-     
     """
 
     dde_ = dde(func)
