@@ -16,7 +16,7 @@ Will solve the delayed Lotka-Volterra system defined as
 
 import unittest
 import numpy as np
-from ddeint import ddeint
+from ddeint import ddeint, ddeVar
 
 def model(XY,t,d):
     x, y = XY(t)
@@ -25,12 +25,16 @@ def model(XY,t,d):
 
 
 class ModelTest(unittest.TestCase):
-    def test_something(self):
+    def test_simple_model(self):
         g = lambda t: np.array([1 + t, 2 - t])  # 'history' at t<0
         tt = np.linspace(0, 30, 20000)  # times for integration
         d = 0.5  # set parameter d
         yy = ddeint(model, g, tt, fargs=(d,))  # solve the DDE !
         self.assertEqual(yy.shape[0], 20000)
+    def test_ddeVar(self):
+        X = ddeVar(lambda t: np.array([t]), 0)
+        self.assertEquals(X(-3), np.array([-3]))
+        self.assertEquals(X(3), np.array([0]))
 
 
 if __name__ == '__main__':
